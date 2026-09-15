@@ -74,6 +74,59 @@
           </table>
         </div>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div v-if="loadingSubmitted" class="loading">{{ t('common.loading') }}</div>
+        <div v-else-if="errorSubmitted" class="error">{{ errorSubmitted }}</div>
+        <div v-else-if="submittedOrders.length === 0" class="loading">
+          {{ t('orders.noSubmittedOrders') }}
+        </div>
+        <div v-else class="table-container">
+          <table class="submitted-orders-table">
+            <thead>
+              <tr>
+                <th>{{ t('orders.table.orderNumber') }}</th>
+                <th>{{ t('orders.table.items') }}</th>
+                <th>{{ t('orders.table.status') }}</th>
+                <th>{{ t('orders.table.orderDate') }}</th>
+                <th>{{ t('orders.table.expectedDelivery') }}</th>
+                <th>{{ t('orders.table.leadTime') }}</th>
+                <th>{{ t('orders.table.totalValue') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="po in submittedOrders" :key="po.id">
+                <td><strong>{{ po.order_number }}</strong></td>
+                <td>
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: po.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="(item, idx) in po.items" :key="idx" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td>
+                  <span :class="['badge', getOrderStatusClass(po.status)]">
+                    {{ t(`status.${po.status.toLowerCase()}`) }}
+                  </span>
+                </td>
+                <td>{{ formatDate(po.created_date) }}</td>
+                <td>{{ formatDate(po.expected_delivery_date) }}</td>
+                <td>{{ po.lead_time_days }} {{ t('dashboard.inventoryShortages.days') }}</td>
+                <td><strong>{{ formatCurrency(po.total_cost, currentCurrency) }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -83,6 +136,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { api } from '../api'
 import { useFilters } from '../composables/useFilters'
 import { useI18n } from '../composables/useI18n'
+import { formatCurrency } from '../utils/currency'
 
 export default {
   name: 'Orders',
@@ -95,6 +149,10 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+
+    const submittedOrders = ref([])
+    const loadingSubmitted = ref(true)
+    const errorSubmitted = ref(null)
 
     // Use shared filters
     const {
@@ -129,6 +187,18 @@ export default {
       loadOrders()
     })
 
+    const loadSubmittedOrders = async () => {
+      try {
+        loadingSubmitted.value = true
+        errorSubmitted.value = null
+        submittedOrders.value = await api.getPurchaseOrders()
+      } catch (err) {
+        errorSubmitted.value = 'Failed to load submitted orders: ' + err.message
+      } finally {
+        loadingSubmitted.value = false
+      }
+    }
+
     const getOrdersByStatus = (status) => {
       return orders.value.filter(order => order.status === status)
     }
@@ -153,7 +223,10 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadSubmittedOrders()
+    })
 
     return {
       t,
@@ -165,7 +238,12 @@ export default {
       formatDate,
       currencySymbol,
       translateProductName,
-      translateCustomerName
+      translateCustomerName,
+      submittedOrders,
+      loadingSubmitted,
+      errorSubmitted,
+      currentCurrency,
+      formatCurrency
     }
   }
 }
@@ -175,6 +253,12 @@ export default {
 /* Fixed table layout to prevent column shifting */
 .orders-table {
   table-layout: fixed;
+  width: 100%;
+}
+
+/* Submitted orders table uses auto layout since its columns differ from .orders-table */
+.submitted-orders-table {
+  table-layout: auto;
   width: 100%;
 }
 

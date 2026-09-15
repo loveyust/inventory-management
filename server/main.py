@@ -1,3 +1,5 @@
+import random
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
@@ -101,23 +103,25 @@ class BacklogItem(BaseModel):
     priority: str
     has_purchase_order: Optional[bool] = False
 
-class PurchaseOrder(BaseModel):
-    id: str
-    backlog_item_id: str
-    supplier_name: str
+class PurchaseOrderLineItem(BaseModel):
+    sku: str
+    name: str
     quantity: int
     unit_cost: float
-    expected_delivery_date: str
-    status: str
-    created_date: str
-    notes: Optional[str] = None
 
 class CreatePurchaseOrderRequest(BaseModel):
-    backlog_item_id: str
-    supplier_name: str
-    quantity: int
-    unit_cost: float
+    items: List[PurchaseOrderLineItem]
+    notes: Optional[str] = None
+
+class PurchaseOrder(BaseModel):
+    id: str
+    order_number: str
+    items: List[PurchaseOrderLineItem]
+    total_cost: float
+    status: str
+    created_date: str
     expected_delivery_date: str
+    lead_time_days: int
     notes: Optional[str] = None
 
 # API endpoints
@@ -174,10 +178,46 @@ def get_backlog():
     for item in backlog_items:
         item_dict = dict(item)
         # Check if this backlog item has a purchase order
-        has_po = any(po["backlog_item_id"] == item["id"] for po in purchase_orders)
+        # Restocking-created purchase orders have no backlog_item_id key, so
+        # subscript access would KeyError once any exist; .get() returns None
+        # instead, which safely evaluates to "no match" here.
+        has_po = any(po.get("backlog_item_id") == item["id"] for po in purchase_orders)
         item_dict["has_purchase_order"] = has_po
         result.append(item_dict)
     return result
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder, status_code=201)
+def create_purchase_order(request: CreatePurchaseOrderRequest):
+    """Create a purchase order (e.g. from the Restocking flow) and store it in-memory"""
+    if not request.items:
+        raise HTTPException(status_code=400, detail="Purchase order must include at least one line item")
+
+    now = datetime.now()
+    # Reuses the same 7-14 day lead-time range generate_data.py uses for orders.json,
+    # since there's no supplier/lead-time data anywhere else to base this on.
+    lead_time_days = random.randint(7, 14)
+    expected_delivery = now + timedelta(days=lead_time_days)
+    total_cost = round(sum(item.quantity * item.unit_cost for item in request.items), 2)
+    next_seq = len(purchase_orders) + 1
+
+    new_po = {
+        "id": str(next_seq),
+        "order_number": f"PO-2025-{next_seq:04d}",
+        "items": [item.model_dump() for item in request.items],
+        "total_cost": total_cost,
+        "status": "Processing",
+        "created_date": now.strftime("%Y-%m-%dT%H:%M:%S"),
+        "expected_delivery_date": expected_delivery.strftime("%Y-%m-%dT%H:%M:%S"),
+        "lead_time_days": lead_time_days,
+        "notes": request.notes,
+    }
+    purchase_orders.append(new_po)
+    return new_po
+
+@app.get("/api/purchase-orders", response_model=List[PurchaseOrder])
+def get_purchase_orders():
+    """Get all purchase orders (in-memory; resets on server restart)"""
+    return purchase_orders
 
 @app.get("/api/dashboard/summary")
 def get_dashboard_summary(
