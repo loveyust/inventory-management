@@ -1,28 +1,28 @@
 [
   {
     "id": "1",
-    "item_sku": "WDG-001",
-    "item_name": "Industrial Widget Type A",
+    "item_sku": "PCB-002",
+    "item_name": "Dual Layer PCB Assembly",
     "current_demand": 300,
-    "forecasted_demand": 450,
+    "forecasted_demand": 420,
     "trend": "increasing",
     "period": "Next 30 days"
   },
   {
     "id": "2",
-    "item_sku": "BRG-102",
-    "item_name": "Steel Bearing Assembly",
-    "current_demand": 150,
-    "forecasted_demand": 152,
-    "trend": "stable",
+    "item_sku": "PSU-507",
+    "item_name": "Adjustable Bench Power Supply",
+    "current_demand": 90,
+    "forecasted_demand": 130,
+    "trend": "increasing",
     "period": "Next 30 days"
   },
   {
     "id": "3",
-    "item_sku": "GSK-203",
-    "item_name": "High-Temperature Gasket",
-    "current_demand": 500,
-    "forecasted_demand": 600,
+    "item_sku": "STP-303",
+    "item_name": "Stepper Motor NEMA 17",
+    "current_demand": 60,
+    "forecasted_demand": 90,
     "trend": "increasing",
     "period": "Next 30 days"
   },
@@ -37,20 +37,20 @@
   },
   {
     "id": "5",
-    "item_sku": "FLT-405",
-    "item_name": "Oil Filter Cartridge",
-    "current_demand": 800,
-    "forecasted_demand": 950,
+    "item_sku": "GYR-207",
+    "item_name": "Gyroscope Module",
+    "current_demand": 220,
+    "forecasted_demand": 300,
     "trend": "increasing",
     "period": "Next 30 days"
   },
   {
     "id": "6",
-    "item_sku": "VLV-506",
-    "item_name": "Pressure Relief Valve",
-    "current_demand": 120,
-    "forecasted_demand": 121,
-    "trend": "stable",
+    "item_sku": "PLY-901",
+    "item_name": "Drive Pulley",
+    "current_demand": 300,
+    "forecasted_demand": 380,
+    "trend": "increasing",
     "period": "Next 30 days"
   },
   {
@@ -64,11 +64,11 @@
   },
   {
     "id": "8",
-    "item_sku": "SNR-420",
+    "item_sku": "TMP-201",
     "item_name": "Temperature Sensor Module",
-    "current_demand": 180,
-    "forecasted_demand": 182,
-    "trend": "stable",
+    "current_demand": 140,
+    "forecasted_demand": 200,
+    "trend": "increasing",
     "period": "Next 30 days"
   },
   {

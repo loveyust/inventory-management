@@ -6,8 +6,11 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '再発注',
     companyName: '触媒コンポーネンツ',
-    subtitle: '在庫管理システム'
+    subtitle: '在庫管理システム',
+    collapseSidebar: 'サイドバーを折りたたむ',
+    expandSidebar: 'サイドバーを展開'
   },
 
   // Dashboard
@@ -112,6 +115,8 @@ export default {
     onTimeDelivery: '定時配達',
     itemsCount: '{count}件',
     quantity: '数量',
+    submittedOrders: '発注済み注文',
+    noSubmittedOrders: 'まだ提出された発注はありません',
     table: {
       orderNumber: '注文番号',
       orderId: '注文ID',
@@ -125,7 +130,8 @@ export default {
       totalValue: '合計金額',
       status: 'ステータス',
       expectedDelivery: '予定配達日',
-      actualDelivery: '実際の配達日'
+      actualDelivery: '実際の配達日',
+      leadTime: 'リードタイム'
     }
   },
 
@@ -185,6 +191,26 @@ export default {
       change: '変化',
       trend: 'トレンド',
       period: '期間'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '再発注',
+    description: '需要予測に基づいて再発注品目を推奨し、注文を行います',
+    budgetLabel: '利用可能な予算',
+    remainingBudget: '残り',
+    recommendedItems: '推奨品目',
+    noCandidates: 'この予算内で再発注が必要な品目はありません',
+    totalCost: '合計コスト',
+    placeOrder: '注文する',
+    orderSuccess: '注文{orderNumber}が正常に送信されました',
+    table: {
+      sku: 'SKU',
+      itemName: '品目名',
+      quantity: '数量',
+      unitCost: '単価',
+      lineCost: '小計'
     }
   },
 

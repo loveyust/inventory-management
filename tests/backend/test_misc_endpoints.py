@@ -52,8 +52,8 @@ class TestDemandEndpoints:
 
         stable_items = [item for item in data if item["trend"].lower() == "stable"]
 
-        # Should have at least 5 stable items
-        assert len(stable_items) >= 5, f"Expected at least 5 stable items, found {len(stable_items)}"
+        # Should have at least 2 stable items
+        assert len(stable_items) >= 2, f"Expected at least 2 stable items, found {len(stable_items)}"
 
         for item in stable_items:
             current = item["current_demand"]
@@ -74,14 +74,20 @@ class TestDemandEndpoints:
         skus = [item["item_sku"] for item in data]
 
         # Should have Temperature Sensor Module and Logic Controller Board
-        assert "SNR-420" in skus, "Missing Temperature Sensor Module"
+        assert "TMP-201" in skus, "Missing Temperature Sensor Module"
         assert "CTL-330" in skus, "Missing Logic Controller Board"
 
-        # Verify they are marked as stable
+        # Logic Controller Board has no matching inventory shortfall and stays stable;
+        # Temperature Sensor Module was remapped to a real inventory SKU (TMP-201) with
+        # a genuine forecasted shortfall so the Restocking feature has a candidate to
+        # recommend, so it's "increasing" now rather than "stable".
         for item in data:
-            if item["item_sku"] in ["SNR-420", "CTL-330"]:
+            if item["item_sku"] == "CTL-330":
                 assert item["trend"].lower() == "stable", \
-                    f"New item {item['item_name']} should have stable trend"
+                    f"Item {item['item_name']} should have stable trend"
+            if item["item_sku"] == "TMP-201":
+                assert item["trend"].lower() == "increasing", \
+                    f"Item {item['item_name']} should have increasing trend"
 
 
 class TestBacklogEndpoints:
